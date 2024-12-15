@@ -27,6 +27,14 @@
                 <label for="cross_icon">Lisää risti profiilikuvan viereen</label>
             </td>
         </tr>
+        <?php if (implode(', ', $user->roles) === "deactivated"): ?>
+        <tr>           
+            <td>
+                <input type="checkbox" name="show_deactivated_member" id="show_deactivated_member" value="yes" <?php checked(get_user_meta($user->ID, 'show_deactivated_member', true), 'yes'); ?>>
+                <label for="show_deactivated_member">Näytä deaktivoitu jäsen verkkosivuilla</label>
+            </td>
+        </tr>
+<?php endif; ?>
         <?php if ($titteli === "Kunniajäsen"):?>
             <th><label for="honorary_number">Kunniajäsennumero</label></th>
             <td>
@@ -114,14 +122,20 @@
             </td>
         </tr>
         <tr>
-            <th><label for="fennoa_country_code">Maa</label></th>
-            <td>
-                <input type="text" name="fennoa_country_code" id="fennoa_country_code" value="<?php echo esc_attr(get_user_meta($user->ID, 'fennoa_country_code', true)); ?>" class="regular-text">
-                <p class="description">ISO 3166-1 alpha-2 -muoto (esim. FI = Suomi).</p>
-                
-            </td>
-        </tr>
-        <tr>
+    <th><label for="live_abroad">Asiakas asuu ulkomailla</label></th>
+    <td>
+        <input type="checkbox" name="live_abroad" id="live_abroad" value="1" <?php checked( get_user_meta( $user->ID, 'live_abroad', true ), 1 ); ?> />
+        <p class="description">Ruksaa tästä jos asiakas asuu ulkomailla</p>
+    </td>
+</tr>
+
+<tr id="country_code_row" <?php echo ( get_user_meta( $user->ID, 'live_abroad', true ) == 1 ) ? '' : 'style="display:none;"'; ?>>
+    <th><label for="fennoa_country_code">Maa</label></th>
+    <td>
+        <input type="text" name="fennoa_country_code" id="fennoa_country_code" value="<?php echo esc_attr( get_user_meta( $user->ID, 'fennoa_country_code', true ) ); ?>" class="regular-text">
+        <p class="description">ISO 3166-1 alpha-2 -muoto (esim. FI = Suomi).</p>
+    </td>
+</tr>
             <th><label for="fennoa_customer_number">Fennoa asiakasnumero</label></th>
             <td>
                 <input type="text" name="fennoa_customer_number" id="fennoa_customer_number" value="<?php echo esc_attr(get_user_meta($user->ID, 'fennoa_customer_number', true)); ?>" class="regular-text">
@@ -147,18 +161,6 @@
             </td>
         </tr>
     </table>
-    <script type="text/javascript">
-        jQuery(document).ready(function($){
-            // Toggle the invoice email input field based on the checkbox
-            $('#use_different_invoice_email').change(function(){
-                if($(this).is(':checked')) {
-                    $('#invoice_email_row').show();
-                } else {
-                    $('#invoice_email_row').hide();
-                }
-            }).trigger('change');
-        });
-    </script>
     <?php
 }
 add_action('show_user_profile', 'custom_user_profile_fields');
@@ -188,7 +190,7 @@ function save_custom_user_profile_fields($user_id) {
         }
 
         // Save additional custom fields
-        $fields = ['first_name','last_name','user_email','phone_number','fennoa_email','fennoa_address','fennoa_postcode','fennoa_city','fennoa_country_code','fennoa_customer_number','fennoa_delivery_method','titteli','honorary_number','osoite','postinumero','postitoimipaikka', 'department', 'company', 'motorcycle','cross_icon', 'vip_member_icon','vip_member_info','member_id', 'biographical_info'];
+        $fields = ['first_name','last_name','user_email','phone_number','fennoa_email','fennoa_address','fennoa_postcode','fennoa_city','fennoa_country_code','fennoa_customer_number','fennoa_delivery_method','titteli','honorary_number','osoite','postinumero','postitoimipaikka', 'department', 'company', 'motorcycle','cross_icon', 'vip_member_icon','vip_member_info','member_id', 'show_deactivated_member','biographical_info'];
         foreach ($fields as $field) {
             if (isset($_POST[$field])) {
                 if ($field === 'user_email') {
@@ -202,6 +204,24 @@ function save_custom_user_profile_fields($user_id) {
                     update_user_meta($user_id, $field, sanitize_text_field($_POST[$field]));
                 }
             }
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $user_id = get_current_user_id(); // Assuming you're working with the current logged-in user
+        
+            // Handle "live_abroad" checkbox
+            $live_abroad = isset($_POST['live_abroad']) ? 1 : 0;
+            update_user_meta($user_id, 'live_abroad', $live_abroad);
+        
+            // If the user lives abroad, save the country code, else set default to 'FI'
+            $country_code = 'FI'; // Default value
+            if ($live_abroad === 1) {
+                if (isset($_POST['fennoa_country_code'])) {
+                    $country_code = sanitize_text_field($_POST['fennoa_country_code']);
+                }
+            }
+            
+            // Update the country code
+            update_user_meta($user_id, 'fennoa_country_code', $country_code);
         }
 
         // Handle first aid date
@@ -266,3 +286,29 @@ function hide_unnecessary_profile_fields() {
 }
 add_action('admin_head', 'hide_unnecessary_profile_fields');
 
+function user_profile_script() {
+    ?>
+    <script type="text/javascript">
+        jQuery(document).ready(function($){
+            // Check if the "I live abroad" checkbox is checked
+            if ($('#live_abroad').is(':checked')) {
+                $('#country_code_row').show(); // Show the country code field
+            } else {
+                $('#country_code_row').hide(); // Hide the country code field
+            }
+
+            // Toggle visibility based on checkbox
+            $('#live_abroad').change(function(){
+                if ($(this).is(':checked')) {
+                    $('#country_code_row').show();
+                } else {
+                    $('#country_code_row').hide();
+                    $('#fennoa_country_code').val('FI'); // Set default value when unchecked
+                }
+            });
+        });
+    </script>
+    <?php
+}
+
+add_action( 'admin_footer', 'user_profile_script' );

@@ -11,10 +11,6 @@ if (!defined('ABSPATH')) {
     exit;
 }
 require_once('includes/profile-fields.php');
-require_once('includes/disable-test.php');
+require_once('includes/disable-email-confirmation.php');
 require_once('includes/user-profile-tracker.php');
-
-
-
-
 ?>

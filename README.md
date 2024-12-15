@@ -20,11 +20,11 @@ Toiminnot ja ominaisuudet:
     •	Käyttäjä voi ladata profiilikuvan, joka tallennetaan WordPressin mediakirjastoon.
     •	Lomakkeella voi hallita näkyvyysasetuksia, kuten piilottaa sähköpostin tai puhelinnumeron muilta.
     •	Käyttäjille voidaan määrittää Fennoa-laskutusjärjestelmää varten asiakasnumero ja laskutustiedot.
-    •	Käyttäjäprofiilin ulkoasua yksinkertaistetaan piilottamalla WordPressin oletuskenttiä, kuten rikkaan tekstin muokkaus ja avatar-asetukset.
+    •	Käyttäjäprofiilin ulkoasua yksinkertaistetaan piilottamalla WordPressin oletuskenttiä, kuten rikkaan tekstin muokkaus ja avatar-asetukset
+    Deaktivoidun jäsenen tietoja voi halutessaan tuoda näkyviin (jos jäsen on esim Kunniajäsen)
 
 Huomioitavaa:
 
-    •	Käyttää JavaScriptiä tiettyjen kenttien dynaamiseen hallintaan (esim. laskutustiedot näytetään vain, jos niitä tarvitaan).
     •	Lisätyt kentät päivitetään tallennuksen yhteydessä ja validoidaan mahdollisuuksien mukaan.
 
 • Mukautettu ulkoasu ja piilotetut kentät toteutetaan CSS:n avulla.
@@ -85,4 +85,3 @@ Huomioitavaa:
     •	Muutosten seuranta koskee vain niitä kenttiä, jotka kuuluvat käyttäjäprofiiliin tai lähetetään päivityksessä.
     •	Tietoja voidaan käyttää myös auditointitarkoituksiin.
     •	Koodi ei kata kaikkia mahdollisia lisäosia, jotka voivat muokata käyttäjäprofiileja omilla menetelmillään.
-# custom-profile-fields
